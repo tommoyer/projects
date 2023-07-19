@@ -62,3 +62,7 @@
         * Resources: folders, git, ...
         * Notes: plain text, ...
     + Plugin APIs for each facet
+    + Reports
+    + Dashboard
+    + GUI
+    + Plugin for Gnome/Systray
