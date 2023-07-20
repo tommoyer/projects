@@ -13,7 +13,7 @@
     + get-keys - Get keys, if they exist
     + set-keys - Set keys, in metadata and state
     + notes
-        - init
+        - new
         - add
         - delete
         - list
