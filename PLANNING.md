@@ -10,15 +10,18 @@
     + sync - Ensure projects state and project metadata match
     + get-tags - Get tags, if they exist
     + set-tags - Update tags, in metadata and state
+    + add-tag
+    + remove-tag
     + get-keys - Get keys, if they exist
     + set-keys - Set keys, in metadata and state
+    + add-key
+    + remove-key
     + notes
-        - init
         - add
         - delete
         - list
-        - delete
         - archive
+        - edit
     + resources
         - location - print location
         - browse - open in file browser
