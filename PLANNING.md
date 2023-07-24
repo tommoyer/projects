@@ -12,10 +12,10 @@
     + set-tags - Update tags, in metadata and state
     + add-tag
     + remove-tag
-    + get-keys - Get keys, if they exist
-    + set-keys - Set keys, in metadata and state
-    + add-key
-    + remove-key
+    + get-keywords - Get keys, if they exist
+    + set-keywords - Set keys, in metadata and state
+    + add-keyword
+    + remove-keyword
     + notes
         - add
         - delete
@@ -26,6 +26,7 @@
         - location - print location
         - browse - open in file browser
         - terminal - run terminal at resource location
+        - enable-git - Add git VCS to folder
     + time
         - start - Add time entry
         - stop - Finish time entry
@@ -40,6 +41,7 @@
         - stop
         - delete
         - shell
+        - list
 
 - Configuration options:
     + Notes root directory
@@ -64,8 +66,9 @@
         * Time tracking: watson, plain text, ...
         * Resources: folders, git, ...
         * Notes: plain text, ...
-    + Plugin APIs for each facet
+        * Containers: LXC, ...
     + Reports
     + Dashboard
     + GUI
     + Plugin for Gnome/Systray
+    + Migrate to annotations in Typer (see itis-vm-repl for example)
