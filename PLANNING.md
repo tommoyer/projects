@@ -72,3 +72,6 @@
     + GUI
     + Plugin for Gnome/Systray
     + Migrate to annotations in Typer (see itis-vm-repl for example)
+    + Look at rich and textual for other fun stuff
+        * https://github.com/Textualize/rich
+        * https://github.com/Textualize/textual
