@@ -34,6 +34,7 @@
         - edit - Edit a time entry
         - status - List current time entry
         - log - Get time entries (switches to filter on project or timespan)
+        - timecards - Get the Selenium IDE project for entering timecards
     + containers
         - new
         - status
