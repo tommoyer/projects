@@ -1,5 +1,5 @@
 [tool.poetry.scripts]
-p = "p:app"
+p = "tmm-projects:app"
 
 [tool.poetry]
 name = "tmm-projects"
