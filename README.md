@@ -1,13 +1,13 @@
 # Projects
 
-Projects is a CLI tool that proives an interface to notes, projects, etc. for my workflow
+Projects is a CLI tool that provides an interface to notes, projects, etc. for my workflow
 
 ## Installation
 
 Use the package manager [pipx](https://pypa.github.io/pipx/) to install projects.
 
 ```bash
-pipx install projects
+pipx install tmm-projects
 ```
 
 ## Usage
