@@ -4,6 +4,7 @@
 import typer
 import pprint
 import logging
+import tomli
 
 from typing import Optional
 from typing_extensions import Annotated
@@ -28,7 +29,12 @@ app.add_typer(subcommands.container.app, name='container', help='Manage containe
 pp = pprint.PrettyPrinter()
 state = data.project.ProjectsState()
 logging.basicConfig(level=logging.WARNING,)
-_logger = logging.getLogger(__name__)
+runtime_state = dict()
+runtime_state['logger'] = logging.getLogger(__name__)
+
+default_config = '''
+
+'''
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -186,10 +192,12 @@ def first_run() -> None:
     Does the initial creation stuff when things like config files and directories don't exist
     This function should never make changes to existing files
     '''
-    _logger.debug('Running first_run()')
-    state.config_directory.mkdir(mode=0o755, parents=True, exist_ok=True)
-    state.config_directory.joinpath('config.toml').touch(mode=0o644, exist_ok=True)
-    state.config_directory.joinpath('projects.state').touch(mode=0o644, exist_ok=True)
+    runtime_state['logger'].debug('Running first_run()')
+    runtime_state['config_directory'].mkdir(mode=0o755, parents=True, exist_ok=True)
+    if not runtime_state['config_directory'].joinpath('config.toml').exists():
+        with open(runtime_state['config_directory'].joinpath('config.toml'), 'w') as f:
+            f.write(default_config)
+    runtime_state['config_directory'].joinpath('projects.state').touch(mode=0o644, exist_ok=True)
 
 
 @app.callback()
@@ -197,13 +205,20 @@ def callback(config_directory: Annotated[Optional[Path], typer.Option(help='Dire
              version: Annotated[Optional[bool], typer.Option("--version", callback=version_callback, is_eager=True, help='Print the version of projects')] = None,
              debug: Annotated[Optional[bool], typer.Option("--debug", help='Enable debugging output')] = False,) -> None:
     if debug:
-        _logger.setLevel(logging.DEBUG)
-        state.set_debug(debug)
+        runtime_state['logger'].setLevel(logging.DEBUG)
 
-    state.config_directory = config_directory
+    runtime_state['config_directory'] = config_directory
+    runtime_state['config'] = None
+    first_run(runtime_state)
 
-    first_run()
+    # Try to read configuration file
+    try:
+        with open(f'{runtime_state["config_directory"]}/config.toml', 'rb') as inputFile:
+            runtime_state['config'] = tomli.load(inputFile)
+    except IOError as e:
+        print('Configuration file not found, using sane defaults')
 
+    # Load project state
 
 if __name__ == '__main__':
     app()
