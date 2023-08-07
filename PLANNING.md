@@ -43,6 +43,11 @@
         - delete
         - shell
         - list
+    + tasks
+        - list
+        - new
+        - mark
+        - delete
 
 - Configuration options:
     + Notes root directory

@@ -1,8 +1,8 @@
 [tool.poetry.scripts]
-p = "proj:app"
+p = "tmm_proj:app"
 
 [tool.poetry]
-name = "projects"
+name = "tmm-proj"
 version = "0.0.2"
 description = ""
 authors = ["Tom Moyer <tommoyer@gmail.com>"]
