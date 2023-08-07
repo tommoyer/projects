@@ -18,6 +18,7 @@ import subcommands.note
 import subcommands.resource
 import subcommands.time
 import subcommands.container
+import subcommands.task
 
 
 app = typer.Typer()
@@ -25,6 +26,7 @@ app.add_typer(subcommands.note.app, name='note', help='Manage notes for a projec
 app.add_typer(subcommands.resource.app, name='resource', help='Manage resources for a project', rich_help_panel='Subcommands', callback=subcommands.resource.project_callback)
 app.add_typer(subcommands.time.app, name='time', help='Manage time tracking for a project', rich_help_panel='Subcommands', callback=subcommands.time.project_callback)
 app.add_typer(subcommands.container.app, name='container', help='Manage containers for a project', rich_help_panel='Subcommands', callback=subcommands.container.project_callback)
+app.add_typer(subcommands.task.app, name='task', help='Manage tasks for a project', rich_help_panel='Subcommands', callback=subcommands.task.project_callback)
 
 pp = pprint.PrettyPrinter()
 state = data.project.ProjectsState()
@@ -219,6 +221,7 @@ def callback(config_directory: Annotated[Optional[Path], typer.Option(help='Dire
         print('Configuration file not found, using sane defaults')
 
     # Load project state
+
 
 if __name__ == '__main__':
     app()
