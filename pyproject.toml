@@ -1,9 +1,9 @@
 [tool.poetry.scripts]
-p = "tmm-projects:app"
+p = "proj:app"
 
 [tool.poetry]
-name = "tmm-projects"
-version = "0.0.1"
+name = "projects"
+version = "0.0.2"
 description = ""
 authors = ["Tom Moyer <tommoyer@gmail.com>"]
 readme = "README.md"
