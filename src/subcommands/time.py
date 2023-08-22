@@ -44,6 +44,11 @@ def timecards():
     pass
 
 
+@app.command()
+def bulk():
+    pass
+
+
 def project_callback(project: str):
     state['project'] = project
 

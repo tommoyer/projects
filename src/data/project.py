@@ -1,5 +1,6 @@
-import json
+import pickle
 import logging
+import typing
 
 from enum import Enum
 from pathlib import Path
@@ -25,7 +26,6 @@ class Project:
     _resource: Path
     _containers: list[str]
     _status: ProjectStatus
-    _parent: str
     _container_driver: str
     _resource_driver: str
     _note_driver: str
@@ -33,7 +33,6 @@ class Project:
 
     def __init__(self,
                  name: str,
-                 parent: str = None,
                  status: ProjectStatus = ProjectStatus.in_progress,
                  keywords: list[str] = None,
                  tags: list[str] = None,
@@ -45,7 +44,6 @@ class Project:
                  container_driver: str = None,
                  time_driver: str = None):
         self._name = name
-        self._parent = parent
         self._status = status
         self._keywords = keywords
         self._tags = tags
@@ -60,26 +58,29 @@ class Project:
 
 class ProjectsState:
     _projects: dict[str, Project]
+    _runtime_state: dict[str, typing.Any]
 
-    def __init__(self):
+    def __init__(self, runtime_state):
         self._projects = dict()
+        self._runtime_state = runtime_state
 
-    def toJson(self) -> str:
-        return json.dumps(self, default=lambda o: o.__dict__)
-
-    def load(self) -> None:
-        state_file = self._config_directory.joinpath('projects.state')
+    def load(self):
+        state_file = self._runtime_state['config_directory'].joinpath('projects.pickle')
         try:
-            with open(state_file, 'r') as f:
-                self._projects = json.loads(f.read())
+            with open(state_file, 'rb') as f:
+                self._projects = pickle.load(f)
         except IOError:
-            _logger.WARNING('Projects state file does not exist, starting fresh')
             self._projects = dict()
+        return self
 
     def save(self) -> None:
-        print('Saving projects state')
-        with open(self._config_directory.joinpath('projects.state'), 'w') as f:
-            f.write(json.dumps(self.toJson()), indent=4)
+        state_file = self._runtime_state['config_directory'].joinpath('projects.pickle')
+        with open(state_file, 'wb') as f:
+            pickle.dump(self._projects, f, pickle.HIGHEST_PROTOCOL)
 
     def add_project(self, new_project: Project) -> None:
         self._projects[new_project._name] = new_project
+        self.save()
+
+    def list(self):
+        return self._projects.keys()

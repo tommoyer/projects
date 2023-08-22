@@ -29,10 +29,10 @@ app.add_typer(subcommands.container.app, name='container', help='Manage containe
 app.add_typer(subcommands.task.app, name='task', help='Manage tasks for a project', rich_help_panel='Subcommands', callback=subcommands.task.project_callback)
 
 pp = pprint.PrettyPrinter()
-state = data.project.ProjectsState()
 logging.basicConfig(level=logging.WARNING,)
-runtime_state = dict()
-runtime_state['logger'] = logging.getLogger(__name__)
+
+state = dict()
+state['logger'] = logging.getLogger(__name__)
 
 default_config = '''
 
@@ -44,7 +44,44 @@ def new(name: Annotated[str, typer.Argument(help='The name of a project to creat
     '''
     Create a new project titled NAME
     '''
-    pass
+    # status
+    status = data.project.ProjectStatus.in_progress
+
+    # keywords
+    keywords = None
+
+    # tags
+    tags = None
+
+    # notes_driver
+    note_driver = None
+
+    # notes_location
+    note_location = None
+
+    # resource_driver
+    resource_driver = None
+
+    # resource_location
+    resource_location = None
+
+    # container_driver
+    container_driver = None
+
+    # time_driver
+    time_driver = None
+
+    new_project = data.project.Project(name=name,
+                                       status=status,
+                                       keywords=keywords,
+                                       tags=tags,
+                                       note_driver=note_driver,
+                                       notes=note_location,
+                                       resource_driver=resource_driver,
+                                       resource=resource_location,
+                                       container_driver=container_driver,
+                                       time_driver=time_driver,)
+    state['projects'].add_project(new_project)
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -52,7 +89,8 @@ def list():
     '''
     List existing projects
     '''
-    typer.echo(f'Called list')
+    for project in state['projects'].list():
+        print(f'{project}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -60,7 +98,7 @@ def archive(name: Annotated[str, typer.Argument(help='The name of a project to a
     '''
     Archive project NAME
     '''
-    typer.echo(f'Called archive {name}')
+    print(f'Called archive {name}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -68,7 +106,7 @@ def delete(name: Annotated[str, typer.Argument(help='The name of a project to de
     '''
     Delete project NAME
     '''
-    typer.echo(f'Called delete {name}')
+    print(f'Called delete {name}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -77,7 +115,7 @@ def grep(name: Annotated[str, typer.Argument(help='The name of a project to sear
     '''
     Search project NAME for SEARCH
     '''
-    typer.echo(f'Called search {name} for {search}')
+    print(f'Called search {name} for {search}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -86,7 +124,7 @@ def set_status(name: Annotated[str, typer.Argument(help='The name of a project t
     '''
     Set status of project NAME to STATUS
     '''
-    typer.echo(f'Called set-status for {name} to {status}')
+    print(f'Called set-status for {name} to {status}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -94,7 +132,7 @@ def get_status(name: Annotated[str, typer.Argument(help='The name of a project t
     '''
     Get status of project NAME
     '''
-    typer.echo(f'Called get-status for {name}')
+    print(f'Called get-status for {name}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -102,7 +140,7 @@ def register(name: Annotated[str, typer.Argument(help='The name of a project to 
     '''
     Register existing project NAME
     '''
-    typer.echo(f'Called register for {name}')
+    print(f'Called register for {name}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -110,7 +148,7 @@ def sync(name: Annotated[str, typer.Argument(help='The name of a project to sync
     '''
     Sync project NAME, ensuring metadata is in syync
     '''
-    typer.echo(f'Called sync for {name}')
+    print(f'Called sync for {name}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -119,7 +157,7 @@ def set_tags(name: Annotated[str, typer.Argument(help='The name of a project to 
     '''
     Set tags of project NAME to TAGS
     '''
-    typer.echo(f'Called set-tags for {name} to tags {tags}')
+    print(f'Called set-tags for {name} to tags {tags}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -127,7 +165,7 @@ def get_tags(name: Annotated[str, typer.Argument(help='The name of a project to 
     '''
     Get tags of project NAME
     '''
-    typer.echo(f'Called get-tags for {name}')
+    print(f'Called get-tags for {name}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -136,7 +174,7 @@ def add_tag(name: Annotated[str, typer.Argument(help='The name of a project to a
     '''
     Add a tag TAG to project NAME
     '''
-    typer.echo(f'Called add-tag for {name} to add tag {tag}')
+    print(f'Called add-tag for {name} to add tag {tag}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -145,7 +183,7 @@ def remove_tag(name: Annotated[str, typer.Argument(help='The name of a project t
     '''
     Remove tag TAG from project NAME
     '''
-    typer.echo(f'Called remove-tag for {name} to remove tag {tag}')
+    print(f'Called remove-tag for {name} to remove tag {tag}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -154,7 +192,7 @@ def set_keywords(name: Annotated[str, typer.Argument(help='The name of a project
     '''
     Set keywords of project NAME to KEYS
     '''
-    typer.echo(f'Called set-keywords for {name} to set keywords {keys}')
+    print(f'Called set-keywords for {name} to set keywords {keys}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -162,7 +200,7 @@ def get_keywords(name: Annotated[str, typer.Argument(help='The name of a project
     '''
     Get keywords of project NAME
     '''
-    typer.echo(f'Called get-keywords for {name}')
+    print(f'Called get-keywords for {name}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -171,7 +209,7 @@ def add_keyword(name: Annotated[str, typer.Argument(help='The name of a project 
     '''
     Add a keyword KEY to project NAME
     '''
-    typer.echo(f'Called add-keyword for {name} to add keyword {key}')
+    print(f'Called add-keyword for {name} to add keyword {key}')
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -180,26 +218,33 @@ def remove_keyword(name: Annotated[str, typer.Argument(help='The name of a proje
     '''
     Remove keyword KEY from project NAME
     '''
-    typer.echo(f'Called remove-keyword for {name} to remove keyword {key}')
+    print(f'Called remove-keyword for {name} to remove keyword {key}')
 
 
 def version_callback(value: bool) -> None:
     if value:
-        typer.echo(f'Projects version: {version("projects")}')
+        print(f'Projects version: {version("projects")}')
         raise typer.Exit()
 
 
-def first_run() -> None:
+def first_run(state: dict) -> None:
     '''
     Does the initial creation stuff when things like config files and directories don't exist
     This function should never make changes to existing files
     '''
-    runtime_state['logger'].debug('Running first_run()')
-    runtime_state['config_directory'].mkdir(mode=0o755, parents=True, exist_ok=True)
-    if not runtime_state['config_directory'].joinpath('config.toml').exists():
-        with open(runtime_state['config_directory'].joinpath('config.toml'), 'w') as f:
+    state['logger'].debug('Running first_run()')
+    state['config_directory'].mkdir(mode=0o755, parents=True, exist_ok=True)
+    if not state['config_directory'].joinpath('config.toml').exists():
+        state['logger'].debug('Creating config.toml')
+        with open(state['config_directory'].joinpath('config.toml'), 'w') as f:
             f.write(default_config)
-    runtime_state['config_directory'].joinpath('projects.state').touch(mode=0o644, exist_ok=True)
+    if not state['config_directory'].joinpath('projects.pickle').exists():
+        state['logger'].debug('Creating state file')
+        with open(state['config_directory'].joinpath('projects.pickle'), 'wb') as f:
+            # create ProjectsState object
+            state['projects'] = data.project.ProjectsState(state)
+            # Pickle it
+            state['projects'].save()
 
 
 @app.callback()
@@ -207,20 +252,21 @@ def callback(config_directory: Annotated[Optional[Path], typer.Option(help='Dire
              version: Annotated[Optional[bool], typer.Option("--version", callback=version_callback, is_eager=True, help='Print the version of projects')] = None,
              debug: Annotated[Optional[bool], typer.Option("--debug", help='Enable debugging output')] = False,) -> None:
     if debug:
-        runtime_state['logger'].setLevel(logging.DEBUG)
+        state['logger'].setLevel(logging.DEBUG)
 
-    runtime_state['config_directory'] = config_directory
-    runtime_state['config'] = None
-    first_run(runtime_state)
+    state['config_directory'] = config_directory
+    state['config'] = None
+    first_run(state)
 
     # Try to read configuration file
     try:
-        with open(f'{runtime_state["config_directory"]}/config.toml', 'rb') as inputFile:
-            runtime_state['config'] = tomli.load(inputFile)
+        with open(f'{state["config_directory"]}/config.toml', 'rb') as inputFile:
+            state['config'] = tomli.load(inputFile)
     except IOError as e:
         print('Configuration file not found, using sane defaults')
 
     # Load project state
+    state['projects'] = data.project.ProjectsState(state).load()
 
 
 if __name__ == '__main__':

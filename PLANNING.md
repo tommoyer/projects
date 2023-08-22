@@ -35,6 +35,7 @@
         - status - List current time entry
         - log - Get time entries (switches to filter on project or timespan)
         - timecards - Get the Selenium IDE project for entering timecards
+        - bulk - Enter bulk timecards
     + containers
         - new
         - status
