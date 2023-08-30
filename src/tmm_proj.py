@@ -5,20 +5,30 @@ import typer
 import pprint
 import logging
 import tomli
+import pkgutil
+import os
 
 from typing import Optional
 from typing_extensions import Annotated
 from pathlib import Path
 from importlib.metadata import version
+from rich.prompt import Prompt
+from rich.table import Table
+from rich.console import Console
 
 # Internal files
 import data.project
 
 import subcommands.note
+import subcommands.plugins.note
 import subcommands.resource
+import subcommands.plugins.resource
 import subcommands.time
+import subcommands.plugins.time
 import subcommands.container
+import subcommands.plugins.container
 import subcommands.task
+import subcommands.plugins.task
 
 
 app = typer.Typer()
@@ -31,8 +41,8 @@ app.add_typer(subcommands.task.app, name='task', help='Manage tasks for a projec
 pp = pprint.PrettyPrinter()
 logging.basicConfig(level=logging.WARNING,)
 
-state = dict()
-state['logger'] = logging.getLogger(__name__)
+state = {}
+_logger = logging.getLogger(__name__)
 
 default_config = '''
 
@@ -44,43 +54,73 @@ def new(name: Annotated[str, typer.Argument(help='The name of a project to creat
     '''
     Create a new project titled NAME
     '''
-    # status
-    status = data.project.ProjectStatus.in_progress
+    if state['projects'].exists(name):
+        print(f'Project {name} already exists')
+        return
 
-    # keywords
-    keywords = None
+    # status
+    print(data.project.ProjectStatus)
+    status = Prompt.ask('Project status [in_progress]', default='in_progress')
+    while not hasattr(data.project.ProjectStatus, status):
+        print(f'{status} is not a valid choice, please enter a valid choice')
+        print(data.project.ProjectStatus)
+        status = Prompt.ask('Project status')
 
     # tags
-    tags = None
+    tags = []
+    tag = Prompt.ask('Tag, enter for none', default=None)
+    while tag:
+        tags.append(tag)
+        tag = Prompt.ask('Next tag, enter to finish', default=None)
 
     # notes_driver
-    note_driver = None
-
-    # notes_location
-    note_location = None
+    note_plugin_path = os.path.dirname(subcommands.plugins.note.__file__)
+    note_plugins = [name for _, name, _ in pkgutil.iter_modules([note_plugin_path])]
+    print(f'Available notes plugins (enter to select none:')
+    for idx, note_plugin in enumerate(note_plugins):
+        print(f' - {note_plugin}')
+    note_driver = Prompt.ask('Note plugin', choices=note_plugins, default=None, show_choices=False)
 
     # resource_driver
-    resource_driver = None
-
-    # resource_location
-    resource_location = None
+    resource_plugin_path = os.path.dirname(subcommands.plugins.resource.__file__)
+    resource_plugins = [name for _, name, _ in pkgutil.iter_modules([resource_plugin_path])]
+    print(f'Available resource plugins (enter to select none:')
+    for idx, resource_plugin in enumerate(resource_plugins):
+        print(f' - {resource_plugin}')
+    resource_driver = Prompt.ask('Resource plugin', choices=resource_plugins, default=None, show_choices=False)
 
     # container_driver
-    container_driver = None
+    container_plugin_path = os.path.dirname(subcommands.plugins.container.__file__)
+    container_plugins = [name for _, name, _ in pkgutil.iter_modules([container_plugin_path])]
+    print(f'Available container plugins (enter to select none:')
+    for idx, container_plugin in enumerate(container_plugins):
+        print(f' - {container_plugin}')
+    container_driver = Prompt.ask('container plugin', choices=container_plugins, default=None, show_choices=False)
 
     # time_driver
-    time_driver = None
+    time_plugin_path = os.path.dirname(subcommands.plugins.time.__file__)
+    time_plugins = [name for _, name, _ in pkgutil.iter_modules([time_plugin_path])]
+    print(f'Available time plugins (enter to select none:')
+    for idx, time_plugin in enumerate(time_plugins):
+        print(f' - {time_plugin}')
+    time_driver = Prompt.ask('time plugin', choices=time_plugins, default=None, show_choices=False)
+
+    # task_driver
+    task_plugin_path = os.path.dirname(subcommands.plugins.task.__file__)
+    task_plugins = [name for _, name, _ in pkgutil.iter_modules([task_plugin_path])]
+    print(f'Available task plugins (enter to select none:')
+    for idx, task_plugin in enumerate(task_plugins):
+        print(f' - {task_plugin}')
+    task_driver = Prompt.ask('task plugin', choices=task_plugins, default=None, show_choices=False)
 
     new_project = data.project.Project(name=name,
                                        status=status,
-                                       keywords=keywords,
                                        tags=tags,
                                        note_driver=note_driver,
-                                       notes=note_location,
                                        resource_driver=resource_driver,
-                                       resource=resource_location,
                                        container_driver=container_driver,
-                                       time_driver=time_driver,)
+                                       time_driver=time_driver,
+                                       task_driver=task_driver)
     state['projects'].add_project(new_project)
 
 
@@ -89,8 +129,12 @@ def list():
     '''
     List existing projects
     '''
+    table = Table(title='Projects')
+    table.add_column('Name')
     for project in state['projects'].list():
-        print(f'{project}')
+        table.add_row(f'{project}')
+    console = Console()
+    console.print(table)
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -136,22 +180,6 @@ def get_status(name: Annotated[str, typer.Argument(help='The name of a project t
 
 
 @app.command(rich_help_panel='Project Commands')
-def register(name: Annotated[str, typer.Argument(help='The name of a project to register')]):
-    '''
-    Register existing project NAME
-    '''
-    print(f'Called register for {name}')
-
-
-@app.command(rich_help_panel='Project Commands')
-def sync(name: Annotated[str, typer.Argument(help='The name of a project to sync')]):
-    '''
-    Sync project NAME, ensuring metadata is in syync
-    '''
-    print(f'Called sync for {name}')
-
-
-@app.command(rich_help_panel='Project Commands')
 def set_tags(name: Annotated[str, typer.Argument(help='The name of a project to work with')],
              tags: Annotated[str, typer.Argument(help='The tags for this project')]):
     '''
@@ -187,38 +215,18 @@ def remove_tag(name: Annotated[str, typer.Argument(help='The name of a project t
 
 
 @app.command(rich_help_panel='Project Commands')
-def set_keywords(name: Annotated[str, typer.Argument(help='The name of a project to set keywords for')],
-                 keys: Annotated[str, typer.Argument(help='The keywords for this project')]):
+def info(name: Annotated[str, typer.Argument(help='The name of a project to show infomation from, leave blank to show all projects')] = None):
     '''
-    Set keywords of project NAME to KEYS
+    Print detailed information about projects
     '''
-    print(f'Called set-keywords for {name} to set keywords {keys}')
-
-
-@app.command(rich_help_panel='Project Commands')
-def get_keywords(name: Annotated[str, typer.Argument(help='The name of a project to get keywords for')]):
-    '''
-    Get keywords of project NAME
-    '''
-    print(f'Called get-keywords for {name}')
-
-
-@app.command(rich_help_panel='Project Commands')
-def add_keyword(name: Annotated[str, typer.Argument(help='The name of a project to add a keyworkd to')],
-                key: Annotated[str, typer.Argument(help='The keyword to add')]):
-    '''
-    Add a keyword KEY to project NAME
-    '''
-    print(f'Called add-keyword for {name} to add keyword {key}')
-
-
-@app.command(rich_help_panel='Project Commands')
-def remove_keyword(name: Annotated[str, typer.Argument(help='The name of a project to remove a keyworkd from')],
-                   key: Annotated[str, typer.Argument(help='The keyword to remove')]):
-    '''
-    Remove keyword KEY from project NAME
-    '''
-    print(f'Called remove-keyword for {name} to remove keyword {key}')
+    if name:
+        try:
+            project = state['projects'][name]
+            project.info()
+        except KeyError:
+            print(f'Project {name} does not exist')
+    else:
+        print(state['projects'].info())
 
 
 def version_callback(value: bool) -> None:
@@ -232,14 +240,14 @@ def first_run(state: dict) -> None:
     Does the initial creation stuff when things like config files and directories don't exist
     This function should never make changes to existing files
     '''
-    state['logger'].debug('Running first_run()')
+    _logger.debug('Running first_run()')
     state['config_directory'].mkdir(mode=0o755, parents=True, exist_ok=True)
     if not state['config_directory'].joinpath('config.toml').exists():
-        state['logger'].debug('Creating config.toml')
+        _logger.debug('Creating config.toml')
         with open(state['config_directory'].joinpath('config.toml'), 'w') as f:
             f.write(default_config)
     if not state['config_directory'].joinpath('projects.pickle').exists():
-        state['logger'].debug('Creating state file')
+        _logger.debug('Creating state file')
         with open(state['config_directory'].joinpath('projects.pickle'), 'wb') as f:
             # create ProjectsState object
             state['projects'] = data.project.ProjectsState(state)
@@ -252,10 +260,11 @@ def callback(config_directory: Annotated[Optional[Path], typer.Option(help='Dire
              version: Annotated[Optional[bool], typer.Option("--version", callback=version_callback, is_eager=True, help='Print the version of projects')] = None,
              debug: Annotated[Optional[bool], typer.Option("--debug", help='Enable debugging output')] = False,) -> None:
     if debug:
-        state['logger'].setLevel(logging.DEBUG)
+        _logger.setLevel(logging.DEBUG)
 
     state['config_directory'] = config_directory
     state['config'] = None
+    state['debug'] = debug
     first_run(state)
 
     # Try to read configuration file
