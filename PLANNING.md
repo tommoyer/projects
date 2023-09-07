@@ -1,84 +1,39 @@
 - Subcommands:
-    + new (in addition to current newproj functionality, ask about git and an upstream URL)
+    + new
+        * p new <project>
     + list - Show table of current projects and meta-data
+        * p list
     + archive - Set status
+        * p archive <project>
     + delete - Remove this project
-    + grep - Search notes and resource folder
+        * p delete <project>
+    + grep - Search notes and resource folder. Options to limit to a project or parent
+        * p grep [--project <project>] [--parent <parent>] <search>
     + set-status - Update status for specified project
+        * p set-status <project>
     + get-status - Show current status for all (or specified)
-    + register - Add existing project to projects
-    + sync - Ensure projects state and project metadata match
+        * p get-status [<project>]
     + get-tags - Get tags, if they exist
+        * p get-tags <project>
     + set-tags - Update tags, in metadata and state
+        * p set-tags <project>
     + add-tag
+        * p add-tag <project>
     + remove-tag
-    + get-keywords - Get keys, if they exist
-    + set-keywords - Set keys, in metadata and state
-    + add-keyword
-    + remove-keyword
-    + notes
-        - add
-        - delete
-        - list
-        - archive
-        - edit
-    + resources
-        - location - print location
-        - browse - open in file browser
-        - terminal - run terminal at resource location
-        - enable-git - Add git VCS to folder
-    + time
-        - start - Add time entry
-        - stop - Finish time entry
-        - cancel - Cancel a time entry
-        - edit - Edit a time entry
-        - status - List current time entry
-        - log - Get time entries (switches to filter on project or timespan)
-        - timecards - Get the Selenium IDE project for entering timecards
-        - bulk - Enter bulk timecards
-    + containers
-        - new
-        - status
-        - start
-        - stop
-        - delete
-        - shell
-        - list
-    + tasks
-        - list
-        - new
-        - mark
-        - delete
-
-- Configuration options:
-    + Notes root directory
-    + Resources root directory
-    + Note template
-    + Editor command
-    + Folder command
-
-- State maintenance:
-    + XXX file in configuration directory
-        * Includes metadata state from `.md` files
-    + Combines with configuration options
-
-- Default template:
-    + Add path to resource root directory
-    + If git is used, include URL of repository
+        * p remove-tag <project>
+    + notes <project> [<subcommand>], if no subcommand call info
+    + resources <project> [<subcommand>], if no subcommand call info
+    + time <project> [<subcommand>], if no subcommand call info
+    + containers <project> [<subcommand>], if no subcommand call info
+    + tasks <project> [<subcommand>], if no subcommand call info
 
 - Enhancements:
     + Custom states
     + Metadata editor
-    + Plugins for each facet
-        * Time tracking: watson, plain text, ...
-        * Resources: folders, git, ...
-        * Notes: plain text, ...
-        * Containers: LXC, ...
     + Reports
     + Dashboard
     + GUI
     + Plugin for Gnome/Systray
-    + Migrate to annotations in Typer (see itis-vm-repl for example)
     + Look at rich and textual for other fun stuff
         * https://github.com/Textualize/rich
         * https://github.com/Textualize/textual

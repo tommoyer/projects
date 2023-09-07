@@ -26,14 +26,14 @@ class ProjectStatus(str, Enum, metaclass=ProjectStatusMeta):
 
 
 class Project:
-    _name: str
-    _tags: list[str]
-    _status: ProjectStatus
-    _container_driver: str
-    _resource_driver: str
-    _note_driver: str
-    _time_driver: str
-    _task_driver: str
+    name: str
+    tags: list[str]
+    status: ProjectStatus
+    container_driver: str
+    resource_driver: str
+    note_driver: str
+    time_driver: str
+    task_driver: str
 
     def __init__(self,
                  name: str,
@@ -44,29 +44,33 @@ class Project:
                  container_driver: str = None,
                  time_driver: str = None,
                  task_driver: str = None):
-        self._name = name
-        self._status = status
-        self._tags = tags
-        self._note_driver = note_driver
-        self._resource_driver = resource_driver
-        self._container_driver = container_driver
-        self._time_driver = time_driver
-        self._task_driver = task_driver
+        self.name = name
+        self.status = status
+        self.tags = tags
+        self.note_driver = note_driver
+        self.resource_driver = resource_driver
+        self.container_driver = container_driver
+        self.time_driver = time_driver
+        self.task_driver = task_driver
+
+    @property
+    def name(self):
+        return self.__name
 
     def info(self):
         console = Console()
         # name
-        console.print(f'Name: [not bold]{self._name}[/not bold]', style='bold')
+        console.print(f'Name: [not bold]{self.name}[/not bold]', style='bold')
         # status
-        console.print(f'Status: [not bold]{self._status}[/not bold]', style='bold')
+        console.print(f'Status: [not bold]{self.status}[/not bold]', style='bold')
         # tags
-        if self._tags:
+        if self.tags:
             console.print('Tags:', style='bold')
-            for tag in self._tags:
+            for tag in self.tags:
                 console.print(f' - {tag}')
         # notes
-        if self._note_driver:
-            console.print(f'Notes [not bold][{self._note_driver}][/not bold]:', style='bold')
+        if self.note_driver:
+            console.print(f'Notes [not bold][{self.note_driver}][/not bold]:', style='bold')
 
         # resources
 
@@ -77,7 +81,7 @@ class Project:
         # tasks
 
 
-class ProjectsState:
+class ProjectsList:
     _projects: dict[str, Project]
     _runtime_state: dict[str, typing.Any]
 

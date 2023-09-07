@@ -7,6 +7,8 @@ import logging
 import tomli
 import pkgutil
 import os
+import importlib
+import sys
 
 from typing import Optional
 from typing_extensions import Annotated
@@ -19,30 +21,13 @@ from rich.console import Console
 # Internal files
 import data.project
 
-import subcommands.note
-import subcommands.plugins.note
-import subcommands.resource
-import subcommands.plugins.resource
-import subcommands.time
-import subcommands.plugins.time
-import subcommands.container
-import subcommands.plugins.container
-import subcommands.task
-import subcommands.plugins.task
-
-
 app = typer.Typer()
-app.add_typer(subcommands.note.app, name='note', help='Manage notes for a project', rich_help_panel='Subcommands', callback=subcommands.note.project_callback)
-app.add_typer(subcommands.resource.app, name='resource', help='Manage resources for a project', rich_help_panel='Subcommands', callback=subcommands.resource.project_callback)
-app.add_typer(subcommands.time.app, name='time', help='Manage time tracking for a project', rich_help_panel='Subcommands', callback=subcommands.time.project_callback)
-app.add_typer(subcommands.container.app, name='container', help='Manage containers for a project', rich_help_panel='Subcommands', callback=subcommands.container.project_callback)
-app.add_typer(subcommands.task.app, name='task', help='Manage tasks for a project', rich_help_panel='Subcommands', callback=subcommands.task.project_callback)
 
 pp = pprint.PrettyPrinter()
 logging.basicConfig(level=logging.WARNING,)
 
 state = {}
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 default_config = '''
 
@@ -73,45 +58,65 @@ def new(name: Annotated[str, typer.Argument(help='The name of a project to creat
         tags.append(tag)
         tag = Prompt.ask('Next tag, enter to finish', default=None)
 
-    # notes_driver
-    note_plugin_path = os.path.dirname(subcommands.plugins.note.__file__)
-    note_plugins = [name for _, name, _ in pkgutil.iter_modules([note_plugin_path])]
-    print(f'Available notes plugins (enter to select none:')
-    for idx, note_plugin in enumerate(note_plugins):
-        print(f' - {note_plugin}')
-    note_driver = Prompt.ask('Note plugin', choices=note_plugins, default=None, show_choices=False)
+    # # notes_driver
+    # note_plugin_path = os.path.dirname(subcommands.plugins.note.__file__)
+    # note_plugins = [name for _, name, _ in pkgutil.iter_modules([note_plugin_path])]
+    # print(f'Available notes plugins (enter to select none):')
+    # for idx, note_plugin in enumerate(note_plugins):
+    #     print(f' - {note_plugin}')
+    # note_driver = Prompt.ask('Note plugin', choices=note_plugins, default=None, show_choices=False)
+    # note_driver_module = f'subcommands.plugins.note.{note_driver}'
+    # note_module = importlib.import_module(note_driver_module)
+    # note_module.config(state)
+    note_driver = None
 
-    # resource_driver
-    resource_plugin_path = os.path.dirname(subcommands.plugins.resource.__file__)
-    resource_plugins = [name for _, name, _ in pkgutil.iter_modules([resource_plugin_path])]
-    print(f'Available resource plugins (enter to select none:')
-    for idx, resource_plugin in enumerate(resource_plugins):
-        print(f' - {resource_plugin}')
-    resource_driver = Prompt.ask('Resource plugin', choices=resource_plugins, default=None, show_choices=False)
+    # # resource_driver
+    # resource_plugin_path = os.path.dirname(subcommands.plugins.resource.__file__)
+    # resource_plugins = [name for _, name, _ in pkgutil.iter_modules([resource_plugin_path])]
+    # print(f'Available resource plugins (enter to select none):')
+    # for idx, resource_plugin in enumerate(resource_plugins):
+    #     print(f' - {resource_plugin}')
+    # resource_driver = Prompt.ask('Resource plugin', choices=resource_plugins, default=None, show_choices=False)
+    # resource_driver_module = f'subcommands.plugins.resource.{resource_driver}'
+    # resource_module = importlib.import_module(resource_driver_module)
+    # resource_module.config(state)
+    resource_driver = None
 
-    # container_driver
-    container_plugin_path = os.path.dirname(subcommands.plugins.container.__file__)
-    container_plugins = [name for _, name, _ in pkgutil.iter_modules([container_plugin_path])]
-    print(f'Available container plugins (enter to select none:')
-    for idx, container_plugin in enumerate(container_plugins):
-        print(f' - {container_plugin}')
-    container_driver = Prompt.ask('container plugin', choices=container_plugins, default=None, show_choices=False)
+    # # container_driver
+    # container_plugin_path = os.path.dirname(subcommands.plugins.container.__file__)
+    # container_plugins = [name for _, name, _ in pkgutil.iter_modules([container_plugin_path])]
+    # print(f'Available container plugins (enter to select none):')
+    # for idx, container_plugin in enumerate(container_plugins):
+    #     print(f' - {container_plugin}')
+    # container_driver = Prompt.ask('container plugin', choices=container_plugins, default=None, show_choices=False)
+    # container_driver_module = f'subcommands.plugins.container.{container_driver}'
+    # container_module = importlib.import_module(container_driver_module)
+    # container_module.config(state)
+    container_driver = None
 
-    # time_driver
-    time_plugin_path = os.path.dirname(subcommands.plugins.time.__file__)
-    time_plugins = [name for _, name, _ in pkgutil.iter_modules([time_plugin_path])]
-    print(f'Available time plugins (enter to select none:')
-    for idx, time_plugin in enumerate(time_plugins):
-        print(f' - {time_plugin}')
-    time_driver = Prompt.ask('time plugin', choices=time_plugins, default=None, show_choices=False)
+    # # time_driver
+    # time_plugin_path = os.path.dirname(subcommands.plugins.time.__file__)
+    # time_plugins = [name for _, name, _ in pkgutil.iter_modules([time_plugin_path])]
+    # print(f'Available time plugins (enter to select none):')
+    # for idx, time_plugin in enumerate(time_plugins):
+    #     print(f' - {time_plugin}')
+    # time_driver = Prompt.ask('time plugin', choices=time_plugins, default=None, show_choices=False)
+    # time_driver_module = f'subcommands.plugins.time.{time_driver}'
+    # time_module = importlib.import_module(time_driver_module)
+    # time_module.config(state)
+    time_driver = None
 
-    # task_driver
-    task_plugin_path = os.path.dirname(subcommands.plugins.task.__file__)
-    task_plugins = [name for _, name, _ in pkgutil.iter_modules([task_plugin_path])]
-    print(f'Available task plugins (enter to select none:')
-    for idx, task_plugin in enumerate(task_plugins):
-        print(f' - {task_plugin}')
-    task_driver = Prompt.ask('task plugin', choices=task_plugins, default=None, show_choices=False)
+    # # task_driver
+    # task_plugin_path = os.path.dirname(subcommands.plugins.task.__file__)
+    # task_plugins = [name for _, name, _ in pkgutil.iter_modules([task_plugin_path])]
+    # print(f'Available task plugins (enter to select none):')
+    # for idx, task_plugin in enumerate(task_plugins):
+    #     print(f' - {task_plugin}')
+    # task_driver = Prompt.ask('task plugin', choices=task_plugins, default=None, show_choices=False)
+    # task_driver_module = f'subcommands.plugins.task.{task_driver}'
+    # task_module = importlib.import_module(task_driver_module)
+    # task_module.config(state)
+    task_driver = None
 
     new_project = data.project.Project(name=name,
                                        status=status,
@@ -180,12 +185,17 @@ def get_status(name: Annotated[str, typer.Argument(help='The name of a project t
 
 
 @app.command(rich_help_panel='Project Commands')
-def set_tags(name: Annotated[str, typer.Argument(help='The name of a project to work with')],
-             tags: Annotated[str, typer.Argument(help='The tags for this project')]):
+def set_tags(name: Annotated[str, typer.Argument(help='The name of a project to work with')],):
     '''
     Set tags of project NAME to TAGS
     '''
-    print(f'Called set-tags for {name} to tags {tags}')
+    # tags
+    print(f'Called set-tags for {name}')
+    tags = []
+    tag = Prompt.ask('Tag, enter for none', default=None)
+    while tag:
+        tags.append(tag)
+        tag = Prompt.ask('Next tag, enter to finish', default=None)
 
 
 @app.command(rich_help_panel='Project Commands')
@@ -240,14 +250,14 @@ def first_run(state: dict) -> None:
     Does the initial creation stuff when things like config files and directories don't exist
     This function should never make changes to existing files
     '''
-    _logger.debug('Running first_run()')
+    logger.debug('Running first_run()')
     state['config_directory'].mkdir(mode=0o755, parents=True, exist_ok=True)
     if not state['config_directory'].joinpath('config.toml').exists():
-        _logger.debug('Creating config.toml')
+        logger.debug('Creating config.toml')
         with open(state['config_directory'].joinpath('config.toml'), 'w') as f:
             f.write(default_config)
     if not state['config_directory'].joinpath('projects.pickle').exists():
-        _logger.debug('Creating state file')
+        logger.debug('Creating state file')
         with open(state['config_directory'].joinpath('projects.pickle'), 'wb') as f:
             # create ProjectsState object
             state['projects'] = data.project.ProjectsState(state)
@@ -257,10 +267,10 @@ def first_run(state: dict) -> None:
 
 @app.callback()
 def callback(config_directory: Annotated[Optional[Path], typer.Option(help='Directory to use for configuration files')] = Path('~/.config/projects/').expanduser(),
-             version: Annotated[Optional[bool], typer.Option("--version", callback=version_callback, is_eager=True, help='Print the version of projects')] = None,
-             debug: Annotated[Optional[bool], typer.Option("--debug", help='Enable debugging output')] = False,) -> None:
+             version: Annotated[Optional[bool], typer.Option('--version', callback=version_callback, is_eager=True, help='Print the version of projects')] = None,
+             debug: Annotated[Optional[bool], typer.Option('--debug', help='Enable debugging output')] = False,) -> None:
     if debug:
-        _logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
 
     state['config_directory'] = config_directory
     state['config'] = None
@@ -271,11 +281,11 @@ def callback(config_directory: Annotated[Optional[Path], typer.Option(help='Dire
     try:
         with open(f'{state["config_directory"]}/config.toml', 'rb') as inputFile:
             state['config'] = tomli.load(inputFile)
-    except IOError as e:
+    except IOError:
         print('Configuration file not found, using sane defaults')
 
     # Load project state
-    state['projects'] = data.project.ProjectsState(state).load()
+    state['projects'] = data.project.ProjectsList(state).load()
 
 
 if __name__ == '__main__':

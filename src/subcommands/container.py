@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# TODO; These files in the subcommands directory should just load the Typer app from the configured plugin for the project and return it
+
 import typer
 
 
